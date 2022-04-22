@@ -1,0 +1,48 @@
+
+apply plugin: 'java'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+defaultTasks 'uberJar'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    implementationAndJar
+    implementation.extendsFrom(implementationAndJar)
+}
+
+dependencies {
+    implementation "log4j:log4j:$log4jVersion"
+    implementation "com.amazonaws:aws-java-sdk-bundle:$awsSdkVersion"
+    implementation "org.apache.spark:spark-sql_${scalaVersion.substring(0, 4)}:$sparkVersion"
+    implementationAndJar "net.sf.jopt-simple:jopt-simple:$joptVersion"
+    testImplementation "junit:junit:$junitVersion"
+}
+
+//create a single Jar with all dependencies
+task uberJar(type: Jar) {
+    archiveClassifier = 'uber'
+    manifest {
+        attributes 'Implementation-Title': 'simpleapp',
+                'Implementation-Version': archiveVersion,
+                'Main-Class': 'simpleapp.CreateTable'
+    }
+    archivesBaseName = project.name
+    from {
+        configurations.implementationAndJar.collect {
+            // See https://docs.gradle.org/6.8.3/userguide/upgrading_version_5.html#implicit_duplicate_strategy_for_copy_or_archive_tasks_has_been_deprecated
+            // (unzip <uberjar file> to see the duplicated files)
+            it.isDirectory() ? it : zipTree(it).matching{exclude{
+                it.path.startsWith('META-INF/DEPENDENCIES') ||
+                        it.path.startsWith('META-INF/LICENSE') ||
+                        it.path.startsWith('META-INF/NOTICE')
+            }}
+        }
+    }
+    with jar
+}
+
+
