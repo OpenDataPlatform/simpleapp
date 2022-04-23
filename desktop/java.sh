@@ -48,7 +48,7 @@ LAUNCH_MODE="--master k8s://${K8S_API_SERVER} --deploy-mode cluster"
 #LAUNCH_MODE="--master local"
 
 set +x
-${SPARK_HOME}/bin/spark-submit ${LAUNCH_MODE} ${CONF} -v --name CreateTableJava --class simpleapp.CreateTable file://$MYDIR/../jvm/build/libs/simpleapp-0.1.0-uber.jar \
+${SPARK_HOME}/bin/spark-submit ${LAUNCH_MODE} ${CONF} -v --name CreateTableJava --class simpleapp.CreateTable file://$MYDIR/../java/build/libs/simpleapp-0.1.0-uber.jar \
 --src s3a://spark-sapp/data/city_temperature.csv  --bucket spark-sapp --database sapp --table ctemp_java --datamartFolder /warehouse/sapp.db \
 --select "$SELECT"
 
