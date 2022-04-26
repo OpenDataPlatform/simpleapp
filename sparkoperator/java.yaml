@@ -1,0 +1,60 @@
+---
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: createtable-java
+  namespace: spark-sapp-work
+spec:
+  type: Scala
+  mode: cluster
+  image: "ghcr.io/opendataplatform/spark-odp:3.2.1"
+  imagePullPolicy: Always
+  mainClass: "simpleapp.CreateTable"
+  mainApplicationFile: "https://n0.minio1:9000/spark-sapp/jars/simpleapp-0.1.0-uber.jar"
+  sparkVersion: "3.2.1"
+  restartPolicy:
+    type: Never
+  arguments:
+    - --src
+    - s3a://spark-sapp/data/city_temperature.csv
+    - --bucket
+    - spark-sapp
+    - --database
+    - sapp
+    - --table
+    - ctemp_java
+    - --datamartFolder
+    - /warehouse/sapp.db
+    - --select
+    - 'SELECT * FROM _src_'
+  sparkConf:
+    "spark.hadoop.fs.s3a.connection.ssl.enabled": "true"
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": "s3a://spark-sapp/eventlogs"
+    "spark.hadoop.fs.s3a.endpoint": "https://n0.minio1:9000/"
+    "spark.hadoop.fs.s3a.access.key": "spark-sapp"
+    "spark.hadoop.fs.s3a.secret.key": "pd2t3yiizB0hTRjQOiIMihNNwMGeBM9P1vd1We2cUK1_MrAkRzY4qg=="
+    "spark.hive.metastore.uris": "thrift://hive-metastore.spark-sapp-sys.svc:9083"
+    "spark.sql.warehouse.dir": "s3a://spark-sapp/warehouse"
+    "hive.metastore.warehouse.dir": "s3a://spark-sapp/warehouse"
+    # These are default values. Need to be redefined here, as the spark operator will override default file, by mounting /opt/spark/conf folder
+    "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
+    "spark.hadoop.fs.s3a.committer.name": "directory"
+    "spark.hadoop.fs.s3a.committer.staging.tmp.path": "/tmp/spark_staging"
+    "spark.hadoop.fs.s3a.buffer.dir": "/tmp/spark_local_buf"
+    "spark.hadoop.fs.s3a.committer.staging.conflict-mode": "fail"
+    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "spark.hadoop.fs.s3a.path.style.access": "true"
+    "spark.hadoop.fs.s3a.fast.upload": "true"
+  driver:
+    coreRequest: "500m"
+    coreLimit: "1500m"
+    memory: "4G"
+    labels:
+      version: "3.2.1"
+    serviceAccount: spark
+  executor:
+    instances: 2
+    coreRequest: "500m"
+    coreLimit: "1500m"
+    memory: "4G"

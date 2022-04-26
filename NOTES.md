@@ -10,8 +10,21 @@ To create kubconfig for spark account
 
 To upload sample data set: 
 ```
-./tools/upload-data.sh minio1/spark-sapp/data/city_temperature.csv
+./tools/upload-data.sh minio1/spark-sapp/data
 ```
+
+To upload java code (For spark operator)
+
+```
+./tools/upload-java-simpleapp.sh minio1/spark-sapp/jars
+```
+
+To upload python code (For spark operator)
+
+```
+./tools/upload-py-simpleapp.sh minio1/spark-sapp/py
+```
+
 
 # Intellij setup
 

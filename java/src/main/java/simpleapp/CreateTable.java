@@ -28,7 +28,7 @@ public class CreateTable {
         spark.sql(String.format("CREATE TABLE IF NOT EXISTS %s.%s USING PARQUET LOCATION 's3a://%s/%s/%s' AS %s", p.getDatabase(), p.getTable(), p.getBucket(), p.getDatamartFolder(), p.getTable(), p.getSelect()));
         spark.sql(String.format("SHOW TABLES FROM %s", p.getDatabase())).show();
         spark.sql(String.format("DESCRIBE TABLE %s.%s", p.getDatabase(), p.getTable())).show();
-        spark.sql(String.format("SELECT COUNT(*) FROM %s.%s", p.getDatabase(), p.getTable())).show();
+        spark.sql(String.format("SELECT COUNT(*) FROM %:@s.%s", p.getDatabase(), p.getTable())).show();
         spark.stop();
         logger.info("--------------- EXITING........");
         System.exit(0);
