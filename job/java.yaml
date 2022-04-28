@@ -36,7 +36,7 @@ spec:
           command:
             - "/bin/sh"
             - -c
-            - >
+            - |
               CONF="--conf spark.kubernetes.container.image=ghcr.io/opendataplatform/spark-odp:3.2.1"
               CONF="${CONF} --conf spark.kubernetes.container.image.pullPolicy=Always"
               CONF="${CONF} --conf spark.executor.instances=2"
@@ -58,9 +58,7 @@ spec:
               CONF="${CONF} --conf spark.hive.metastore.uris=thrift://hive-metastore.${HIVE_METASTORE_NAMESPACE}.svc:9083"
               CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
               CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
-              
               # These are default values. Need to be redefined here as default file is overrided, by mounting /opt/spark/conf folder
-              
               CONF="${CONF} --conf spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a=org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
               CONF="${CONF} --conf spark.hadoop.fs.s3a.committer.name=directory"
               CONF="${CONF} --conf spark.hadoop.fs.s3a.committer.staging.tmp.path=/tmp/spark_staging"
@@ -69,14 +67,10 @@ spec:
               CONF="${CONF} --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem"
               CONF="${CONF} --conf spark.hadoop.fs.s3a.path.style.access=true"
               CONF="${CONF} --conf spark.hadoop.fs.s3a.fast.upload=true"
-              
               CONF="${CONF} --conf spark.driver.host=$(hostname -I)"  # For --deploy-mode client
-              
               JAR="https://n0.minio1:9000/spark-sapp/jars/simpleapp-0.1.0-uber.jar"
-              
               set -x
               set -f
-                            
               /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-java --class simpleapp.CreateTable $CONF  $JAR \
                 --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_job_java --datamartFolder /warehouse/sapp.db \
                 --select "SELECT * FROM _src_"
