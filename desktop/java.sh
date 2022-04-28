@@ -41,14 +41,11 @@ CONF="${CONF} --conf spark.hive.metastore.uris=thrift://hive-metastore.${HIVE_ME
 CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 
+JAR="file://$MYDIR/../java/build/libs/simpleapp-0.1.0-uber.jar"
+
 export JAVA_TOOL_OPTIONS="-Dcom.amazonaws.sdk.disableCertChecking=true"
-
-LAUNCH_MODE="--master k8s://${K8S_API_SERVER} --deploy-mode cluster"
-#LAUNCH_MODE="--master k8s://${K8S_API_SERVER} --deploy-mode client"
-#LAUNCH_MODE="--master local"
-
 set +x
-${SPARK_HOME}/bin/spark-submit ${LAUNCH_MODE} ${CONF} -v --name CreateTableJava --class simpleapp.CreateTable file://$MYDIR/../java/build/libs/simpleapp-0.1.0-uber.jar \
---src s3a://spark-sapp/data/city_temperature.csv  --bucket spark-sapp --database sapp --table ctemp_java --datamartFolder /warehouse/sapp.db \
+${SPARK_HOME}/bin/spark-submit --master k8s://${K8S_API_SERVER} --deploy-mode cluster ${CONF} -v --name ctemp-desktop-java --class simpleapp.CreateTable $JAR \
+--src s3a://spark-sapp/data/city_temperature.csv  --bucket spark-sapp --database sapp --table ctemp_desktop_java --datamartFolder /warehouse/sapp.db \
 --select "$SELECT"
 

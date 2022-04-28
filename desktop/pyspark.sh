@@ -41,14 +41,12 @@ CONF="${CONF} --conf spark.hive.metastore.uris=thrift://hive-metastore.${HIVE_ME
 CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 
+PY_FILE= ${MYDIR}/../py/create_table.py
+
 export JAVA_TOOL_OPTIONS="-Dcom.amazonaws.sdk.disableCertChecking=true"
 
-LAUNCH_MODE="--master k8s://${K8S_API_SERVER} --deploy-mode cluster"
-#LAUNCH_MODE="--master k8s://${K8S_API_SERVER} --deploy-mode client"
-#LAUNCH_MODE="--master local"
-
 set +x
-${SPARK_HOME}/bin/spark-submit ${LAUNCH_MODE} ${CONF} \
---name CreateTablePy ${MYDIR}/../py/create_table.py --src s3a://spark-sapp/data/city_temperature.csv  --bucket spark-sapp --database sapp --table ctemp_py --datamartFolder /warehouse/sapp.db \
+${SPARK_HOME}/bin/spark-submit --master k8s://${K8S_API_SERVER} --deploy-mode cluster ${CONF} \
+--name ctemp-desktop-py $PY_FILE --src s3a://spark-sapp/data/city_temperature.csv  --bucket spark-sapp --database sapp --table ctemp_desktop_py --datamartFolder /warehouse/sapp.db \
 --select "$SELECT"
 

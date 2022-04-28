@@ -2,7 +2,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
-  name: createtable-py
+  name: ctemp-sop-py
   namespace: spark-sapp-work
 spec:
   type: Python
@@ -22,7 +22,7 @@ spec:
     - --database
     - sapp
     - --table
-    - ctemp_py
+    - ctemp_sop_py
     - --datamartFolder
     - /warehouse/sapp.db
     - --select

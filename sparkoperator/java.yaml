@@ -2,7 +2,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
-  name: createtable-java
+  name: ctemp-sop-java
   namespace: spark-sapp-work
 spec:
   type: Scala
@@ -22,7 +22,7 @@ spec:
     - --database
     - sapp
     - --table
-    - ctemp_java
+    - ctemp_sop_java
     - --datamartFolder
     - /warehouse/sapp.db
     - --select
