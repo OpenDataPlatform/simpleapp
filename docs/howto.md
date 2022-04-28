@@ -68,3 +68,9 @@ See [pyspark.yaml](../sparkoperator/pyspark.yaml)
 ### Java
 
 ### Python 
+
+## Variations
+
+- Use wrapper mode
+- Embed application code in image
+- Inject secret using code
