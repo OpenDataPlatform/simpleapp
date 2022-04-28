@@ -1,7 +1,6 @@
 #!/bin/bash
 
 MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-BASEDIR="$(cd $MYDIR/../.. && pwd)"
 
 if [ -z "${KUBECONFIG}" ]; then echo "KUBECONFIG must be defined with some admin rights";  exit 1; fi
 

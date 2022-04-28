@@ -20,9 +20,15 @@ spec:
             - name: S3_ENDPOINT
               value: "https://n0.minio1:9000/"
             - name: S3_ACCESS_KEY
-              value: "spark-sapp"
+              valueFrom:
+                secretKeyRef:
+                  key: accessKey
+                  name: s3access
             - name: S3_SECRET_KEY
-              value: "pd2t3yiizB0hTRjQOiIMihNNwMGeBM9P1vd1We2cUK1_MrAkRzY4qg=="
+              valueFrom:
+                secretKeyRef:
+                  key: secretKey
+                  name: s3access
             - name: NAMESPACE
               value: "spark-sapp-work"
             - name: APP_NAME
