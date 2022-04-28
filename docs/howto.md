@@ -75,5 +75,6 @@ See [pyspark.yaml](../sparkoperator/pyspark.yaml)
 ## Variations
 
 - Use wrapper mode
+- Add application code to launcher (python)
 - Embed application code in image
 - Inject secret using code

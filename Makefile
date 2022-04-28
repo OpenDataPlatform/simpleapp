@@ -20,6 +20,7 @@ prepare: toolsexec kubeconfig upload-data upload-code s3secret ## handle all pre
 
 toolsexec: ## To execute after git clone
 	chmod +x ./tools/*.sh
+	chmod +x ./launchers/*/*.sh
 
 kubeconfig: ## Generate kubeconfig for spark service account
 	./tools/generate-kubeconfig.sh $(NAMESPACE) $(SERVICE_ACCOUNT) ./kubeconfigs/$(NAMESPACE).$(SERVICE_ACCOUNT)
