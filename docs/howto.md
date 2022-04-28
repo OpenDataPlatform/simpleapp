@@ -22,6 +22,7 @@
 - [Launch as an Apache Airflow task](#launch-as-an-apache-airflow-task)
   - [Java](#java-4)
   - [Python](#python-5)
+- [Variations](#variations)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
