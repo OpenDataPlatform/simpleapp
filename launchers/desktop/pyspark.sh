@@ -2,7 +2,7 @@
 
 MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export KUBECONFIG=${MYDIR}/../kubeconfigs/spark-sapp-work.spark
+export KUBECONFIG=${MYDIR}/../../kubeconfigs/spark-sapp-work.spark
 
 # Theses variable must be adjusted to match environment:
 NAMESPACE="spark-sapp-work"
@@ -41,11 +41,12 @@ CONF="${CONF} --conf spark.hive.metastore.uris=thrift://hive-metastore.${HIVE_ME
 CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 
-JAR="file://$MYDIR/../java/build/libs/simpleapp-0.1.0-uber.jar"
+PY_FILE=${MYDIR}/../../py/create_table.py
 
 export JAVA_TOOL_OPTIONS="-Dcom.amazonaws.sdk.disableCertChecking=true"
+
 set +x
-${SPARK_HOME}/bin/spark-submit --master k8s://${K8S_API_SERVER} --deploy-mode cluster ${CONF} -v --name ctemp-desktop-java --class simpleapp.CreateTable $JAR \
---src s3a://spark-sapp/data/city_temperature.csv  --bucket spark-sapp --database sapp --table ctemp_desktop_java --datamartFolder /warehouse/sapp.db \
+${SPARK_HOME}/bin/spark-submit --master k8s://${K8S_API_SERVER} --deploy-mode cluster ${CONF} \
+--name ctemp-desktop-py $PY_FILE --src s3a://spark-sapp/data/city_temperature.csv  --bucket spark-sapp --database sapp --table ctemp_desktop_py --datamartFolder /warehouse/sapp.db \
 --select "$SELECT"
 
