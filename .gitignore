@@ -1,3 +1,4 @@
 .idea
 **/*.iml
 *.kconfig
+.DS_Store
