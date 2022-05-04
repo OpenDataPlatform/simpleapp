@@ -13,15 +13,15 @@ secret_access_key=Secret("env", "S3_ACCESS_KEY", "s3access", "accessKey" )
 secret_secret_key=Secret("env", "S3_SECRET_KEY", "s3access", "secretKey" )
 
 with DAG(
-        dag_id='java',
+        dag_id='pyspark',
         schedule_interval=None,
         start_date=datetime(2021, 1, 1),
-        tags=['example', "spark", "java"],
+        tags=['example', "spark", "python"],
 ) as dag:
     kpo = KubernetesPodOperator(
         namespace='spark-sapp-work',
-        task_id="ctemp-java",
-        name="ctemp-airflow-java",
+        task_id="ctemp-py",
+        name="ctemp-airflow-py",
         config_file=configuration_file_path,
         in_cluster=False,
         service_account_name="spark",
@@ -63,12 +63,12 @@ with DAG(
               CONF="${CONF} --conf spark.hadoop.fs.s3a.path.style.access=true"
               CONF="${CONF} --conf spark.hadoop.fs.s3a.fast.upload=true"
               CONF="${CONF} --conf spark.driver.host=$(hostname -I)"  # For --deploy-mode client
-              JAR="https://n0.minio1:9000/spark-sapp/jars/simpleapp-0.1.0-uber.jar"
+              PY_CODE="https://n0.minio1:9000/spark-sapp/py/create_table.py"
               set -x
               set -f
-              /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-airflow-java --class simpleapp.CreateTable $CONF  $JAR \
-                --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_airflow_java --datamartFolder /warehouse/sapp.db \
-                --select "SELECT * FROM _src_"
+              /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-airflow-py $CONF $PY_CODE \
+              --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_airflow_py --datamartFolder /warehouse/sapp.db \
+              --select "SELECT * FROM _src_"
         """],
     )
 

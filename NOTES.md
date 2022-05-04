@@ -1,3 +1,14 @@
+# links
+
+
+[Argocd](https://argocd.shared1)
+
+[minio-console-minio1](https://n0.minio1:9443/)
+
+[sapp-History Server](https://sapp-history-server.shared1)
+
+[sapp-jhub](https://sapp-jhub.shared1)
+
 
 
 # Initial setup
