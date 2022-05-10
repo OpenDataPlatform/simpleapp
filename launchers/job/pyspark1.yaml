@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ctemp-job-py
+  name: ctemp-job-py1
   namespace: spark-sapp-work
 spec:
   ttlSecondsAfterFinished: 200
@@ -11,7 +11,7 @@ spec:
       serviceAccountName: spark
       restartPolicy: Never
       containers:
-        - name: ctemp-job-py
+        - name: ctemp-job-py1
           image: "ghcr.io/opendataplatform/spark-odp:3.2.1"
           imagePullPolicy: Always
           env:
@@ -68,6 +68,6 @@ spec:
               PY_CODE="https://n0.minio1:9000/spark-sapp/py/create_table.py"
               set -x
               set -f
-              /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-py $CONF $PY_CODE \
-              --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_job_py --datamartFolder /warehouse/sapp.db \
+              /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-py1 $CONF $PY_CODE \
+              --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_job_py1 --datamartFolder /warehouse/sapp.db \
               --select "SELECT * FROM _src_"

@@ -5,10 +5,15 @@ MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ -z "${KUBECONFIG}" ]; then echo "KUBECONFIG must be defined with some admin rights";  exit 1; fi
 
 # To adjust to your application context
-NAMESPACE=spark-sapp-work
-BUCKET=spark-sapp
-S3_ENDPOINT=https://n0.minio1:9000/
-HIVE_METASTORE_NAMESPACE=spark-sapp-sys
+#NAMESPACE=spark-sapp-work
+#BUCKET=spark-sapp
+#S3_ENDPOINT=https://n0.minio1:9000/
+#HIVE_METASTORE_NAMESPACE=spark-sapp-sys
+
+NAMESPACE=$1; shift
+BUCKET=$1; shift
+S3_ENDPOINT=$1; shift
+HIVE_METASTORE_NAMESPACE=$1; shift
 
 
 kubectl apply -f - <<EOF

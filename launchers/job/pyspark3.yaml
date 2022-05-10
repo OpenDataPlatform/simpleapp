@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ctemp-job-py2
+  namespace: spark-sapp-work
+spec:
+  ttlSecondsAfterFinished: 200
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: spark
+      restartPolicy: Never
+      containers:
+        - name: ctemp-job-py3
+          image: "ghcr.io/opendataplatform/sapp:0.1.0"
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: sapp-default
+          env:
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: accessKey
+                  name: s3access
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: secretKey
+                  name: s3access
+          command:
+            - "/bin/sh"
+            - -c
+            - |
+              PY_CODE="local:///opt/create_table.py"
+              . /opt/confBuilder.sh
+              set -x
+              set -f
+              /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-py3 $CONF $PY_CODE \
+              --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_job_py3 --datamartFolder /warehouse/sapp.db \
+              --select "SELECT * FROM _src_"

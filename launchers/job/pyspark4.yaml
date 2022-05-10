@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ctemp-job-py4
+  namespace: spark-sapp-work
+spec:
+  ttlSecondsAfterFinished: 200
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: spark
+      restartPolicy: Never
+      containers:
+        - name: ctemp-job-py4
+          image: "ghcr.io/opendataplatform/spark-odp:3.2.1"
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: sapp-default
+          env:
+            - { name: SRC, value: "s3a://spark-sapp/data/city_temperature.csv" }
+            - { name: SPARK_BUCKET, value: "spark-sapp" }
+            - { name: DATABASE, value: "sapp" }
+            - { name: TABLE, value: "ctmp_job_py4" }
+            - { name: DATAMART_FOLDER, value: "/warehouse/sapp.db" }
+            - { name: SELECT, value: "SELECT * FROM _src_" }
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: accessKey
+                  name: s3access
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: secretKey
+                  name: s3access
+          command:
+            - "/bin/sh"
+            - -c
+            - |
+              cat >/tmp/work.py <<EOF
+              # -------------------------------------
+              from pyspark.sql import SparkSession
+              import sys
+              spark = SparkSession.builder.enableHiveSupport().getOrCreate()
+              df = spark.read.options(header='True', inferSchema='True', delimiter=",").csv("${SRC}")
+              df.createOrReplaceTempView("_src_")
+              df.show()
+              spark.sql("CREATE DATABASE IF NOT EXISTS ${DATABASE}")
+              spark.sql("DROP TABLE IF EXISTS ${DATABASE}.${TABLE}")
+              spark.sql("CREATE TABLE IF NOT EXISTS ${DATABASE}.${TABLE} USING PARQUET LOCATION 's3a://${SPARK_BUCKET}/${DATAMART_FOLDER}/${TABLE}' AS ${SELECT}")
+              spark.sql("SHOW TABLES FROM ${DATABASE}").show()
+              spark.sql("DESCRIBE TABLE ${DATABASE}.${TABLE}").show()
+              spark.sql("SELECT COUNT(*) FROM ${DATABASE}.${TABLE}").show()
+              spark.stop()
+              sys.exit(0)
+              EOF
+              # -------------------------------------
+              PY_CODE="/tmp/work.py"
+              . /opt/confBuilder.sh
+              set -x
+              set -f
+              /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-py4 $CONF $PY_CODE

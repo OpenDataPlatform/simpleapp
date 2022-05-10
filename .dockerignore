@@ -1,0 +1,4 @@
+# Exclude all what is required to build images
+*
+!py
+!java
