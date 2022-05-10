@@ -12,11 +12,8 @@ Note all these image include support for both amd64 and arm64 platforms
 - [Standard Spark base image](#standard-spark-base-image)
 - [Spark-odp image](#spark-odp-image)
 - [Spark operator image](#spark-operator-image)
-- [The 'wrapper' mode](#the-wrapper-mode)
+- [The `confBuilder.sh` script](#the-confbuildersh-script)
   - [Variables](#variables)
-- [Some application example](#some-application-example)
-  - [Kubernetes Job](#kubernetes-job)
-  - [Argo workflow template](#argo-workflow-template)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -51,7 +48,7 @@ It include a set of modifications allowing smooth integration in OpenDataPlatfom
 
   A basic log4j configuration is provided.
 
-- wrapper mode
+- confBuilder.sh script
 
   When used as Spark client, an helper script may be used to ease configuration. See below for a full description
 
@@ -63,9 +60,9 @@ This is a rebuild of the spark-operator image, based on spark-odp. Aim is to pro
 - Support run as non root.
 - multiplatform support
 
-## The 'wrapper' mode
+## The `confBuilder.sh` script
 
-When submitting a Spark application, a bnch of options must be provided, typically using the `--conf` parameter. A typical submit operation may look like this: 
+When submitting a Spark application, a bunch of options must be provided, typically using the `--conf` parameter. A typical submit operation may look like this: 
 
 ```
  .../bin/spark-submit --master k8s://https://192.168.56.14:6443 --deploy-mode cluster
@@ -126,58 +123,4 @@ Here is a description of all environment variable which can be set:
 | HIVE_METASTORE_URI     | No   | spark.hive.metastore.uris                   | If not set, no mtastore will be configured                  |
 | SQL_WAREHOUSE_DIR      | No   | spark.sql.warehouse.dir                     | Default: `/warehouse`                                       |
 | SQL_WAREHOUSE_BUCKET   | No   | spark.sql.warehouse.dir                     | If not set, no warehouse will be configured                 |
-
-
-## Some application example
-
-### Kubernetes Job
-
-```yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: json2parquet
-  namespace: spark-tawf-work
-spec:
-  ttlSecondsAfterFinished: 200
-  backoffLimit: 1
-  template:
-    spec:
-      serviceAccountName: spark
-      containers:
-        - name: json2parquet
-          image: ghcr.io/opendataplatform/spark-odp:3.2.1
-          imagePullPolicy: Always
-          env:
-          - name: APP_NAME
-            value: json2parquet
-          - name: CLASS_NAME
-            value: gha2spark.Json2Parquet
-          - name: JAR
-            value: "s3a://spark-tawf/jars/gha2spark-0.1.2-uber.jar"
-          - name: EXECUTOR_MEMORY
-            value: "6G"
-          envFrom:
-          - configMapRef:
-              name: jobs-config
-          args:
-            - wrapper
-            - --backDays
-            - "1"
-            - --maxFiles
-            - "1"
-            - --waitSeconds
-            - "0"
-            - --srcBucketFormat
-            - "spark-tawf"
-            - --srcObjectFormat
-            - "/data/primary/gha-{{year}}-{{month}}-{{day}}-{{hour}}.json.gz"
-            - --dstBucketFormat
-            - "spark-tawf"
-            - --dstObjectFormat
-            - "/data/secondary/raw/year={{year}}/month={{month}}/day={{day}}/hour={{hour}}"
-      restartPolicy: Never
-```
-
-### Argo workflow template
 
