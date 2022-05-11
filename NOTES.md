@@ -11,7 +11,7 @@
 
 [sapp-jhub](https://sapp-jhub.shared1)
 
-
+[Airflow](http://localhost:8080/home)
 
 # Initial setup
 
@@ -86,7 +86,7 @@ cd ../py/
 
 
 # AIRFLOW
-
+```
 mkdir airflow
 cd airflow
 curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.3.0/docker-compose.yaml'
@@ -96,9 +96,7 @@ echo -e "AIRFLOW_UID=$(id -u)" > .env
 
 docker-compose up airflow-init
 
-docker-compose up
-or
-docker-compose up
+docker-compose up -d
 
 docker-compose run airflow-worker airflow info
 
@@ -109,15 +107,19 @@ chmod +x airflow.sh
 ./airflow.sh dags list
 
 ./airflow.sh info
-
-or 
+# or 
 ./airflow.sh bash
 Creating airflow_airflow-cli_run ... done
 default@8a64e06828eb:/opt/airflow$ airflow dags list
 
+```
 
 In docker-compose:
+```
 AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+```
 
 # To update stuff (DagBag) after modification in dags folder:
+```
 airflow dags reserialize
+```
