@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ctemp-awf-py4-
+  namespace: spark-sapp-work
+  labels:
+    workflows.argoproj.io/archive-strategy: "false"
+    workflows.argoproj.io/container-runtime-executor: emissary
+spec:
+  entrypoint: create-table
+  arguments:
+    parameters:
+      - { name: src, value: "s3a://spark-sapp/data/city_temperature.csv" }
+      - { name: bucket, value: "spark-sapp" }
+      - { name: database, value: "sapp" }
+      - { name: table, value: "ctemp_awf_py4" }
+      - { name: datamartFolder, value: "/warehouse/sapp.db" }
+      - { name: select, value: "SELECT * FROM _src_" }
+  templates:
+    - name: create-table
+      inputs:
+        parameters:
+          - name: src
+          - name: bucket
+          - name: database
+          - name: table
+          - name: datamartFolder
+          - name: select
+      serviceAccountName: spark
+      script:
+        image: ghcr.io/opendataplatform/sapp:0.1.0
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: sapp-default
+        env:
+          - name: S3_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                key: accessKey
+                name: s3access
+          - name: S3_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                key: secretKey
+                name: s3access
+        command: [bash]
+        source: |
+          cat >/tmp/work.py <<EOF
+          # -------------------------------------
+          from pyspark.sql import SparkSession
+          import sys
+          spark = SparkSession.builder.enableHiveSupport().getOrCreate()
+          df = spark.read.options(header='True', inferSchema='True', delimiter=",").csv("{{ inputs.parameters.src }}")
+          df.createOrReplaceTempView("_src_")
+          df.show()
+          spark.sql("CREATE DATABASE IF NOT EXISTS {{ inputs.parameters.database }}")
+          spark.sql("DROP TABLE IF EXISTS {{ inputs.parameters.database }}.{{ inputs.parameters.table }}")
+          spark.sql("CREATE TABLE IF NOT EXISTS {{ inputs.parameters.database }}.{{ inputs.parameters.table }} USING PARQUET LOCATION 's3a://{{ inputs.parameters.bucket }}/{{ inputs.parameters.datamartFolder }}/{{ inputs.parameters.table }}' AS {{ inputs.parameters.select }}")
+          spark.sql("SHOW TABLES FROM {{ inputs.parameters.database }}").show()
+          spark.sql("DESCRIBE TABLE {{ inputs.parameters.database }}.{{ inputs.parameters.table }}").show()
+          spark.sql("SELECT COUNT(*) FROM {{ inputs.parameters.database }}.{{ inputs.parameters.table }}").show()
+          spark.stop()
+          sys.exit(0)
+          EOF
+          # -------------------------------------
+          PY_CODE="/tmp/work.py"
+          . /opt/confBuilder.sh
+          set -x
+          set -f
+          /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-awf-py4 $CONF $PY_CODE 

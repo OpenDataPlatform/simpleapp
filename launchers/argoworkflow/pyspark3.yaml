@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ctemp-awf-py3-
+  namespace: spark-sapp-work
+  labels:
+    workflows.argoproj.io/archive-strategy: "false"
+    workflows.argoproj.io/container-runtime-executor: emissary
+spec:
+  entrypoint: create-table
+  arguments:
+    parameters:
+      - { name: src, value: "s3a://spark-sapp/data/city_temperature.csv" }
+      - { name: bucket, value: "spark-sapp" }
+      - { name: database, value: "sapp" }
+      - { name: table, value: "ctemp_awf_py3" }
+      - { name: datamartFolder, value: "/warehouse/sapp.db" }
+      - { name: select, value: "SELECT * FROM _src_" }
+  templates:
+    - name: create-table
+      inputs:
+        parameters:
+          - name: src
+          - name: bucket
+          - name: database
+          - name: table
+          - name: datamartFolder
+          - name: select
+      serviceAccountName: spark
+      script:
+        image: ghcr.io/opendataplatform/sapp:0.1.0
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: sapp-default
+        env:
+          - name: S3_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                key: accessKey
+                name: s3access
+          - name: S3_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                key: secretKey
+                name: s3access
+        command: [bash]
+        source: |
+          PY_CODE="local:///opt/create_table.py"
+          . /opt/confBuilder.sh
+          set -x
+          set -f
+          /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-awf-py3 $CONF $PY_CODE \
+            --src "{{ inputs.parameters.src }}"  --bucket {{ inputs.parameters.bucket }} --datamartFolder "{{ inputs.parameters.datamartFolder }}" \
+            --database {{ inputs.parameters.database }} --table {{ inputs.parameters.table }} \
+            --select "{{ inputs.parameters.select }}"
