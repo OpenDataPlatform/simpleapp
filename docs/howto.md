@@ -45,7 +45,7 @@ On top of that, there are other variations:
 - Is the application code embedded in the container image or stored on an external repository ?
 - In the (frequent) case where several jobs share a set of common configuration parameters, do we try to mutualise their definition in a single place ? 
 
-### The sample (and simple) application
+### The sample (and simple) CreateTable application
 
 This HowTo is built around a sample application, which must be as simple as possible, to keep focus on launching method.
 

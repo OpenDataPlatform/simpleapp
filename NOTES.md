@@ -3,6 +3,8 @@
 
 [Argocd](https://argocd.shared1)
 
+[Argo workflow](https://argoqs.shared1)
+
 [minio-console-minio1](https://n0.minio1:9443/)
 
 [sapp-History Server](https://sapp-history-server.shared1)

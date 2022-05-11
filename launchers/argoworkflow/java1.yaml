@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: ctemp-awf-py-
+  generateName: ctemp-awf-java1-
   namespace: spark-sapp-work
   labels:
     workflows.argoproj.io/archive-strategy: "false"
@@ -10,16 +10,22 @@ spec:
   entrypoint: create-table
   arguments:
     parameters:
-      - name: database
-        value: "sapp"
-      - name: table
-        value: "ctemp_awf_py"
+      - { name: src, value: "s3a://spark-sapp/data/city_temperature.csv" }
+      - { name: bucket, value: "spark-sapp" }
+      - { name: database, value: "sapp" }
+      - { name: table, value: "ctemp_awf_java1" }
+      - { name: datamartFolder, value: "/warehouse/sapp.db" }
+      - { name: select, value: "SELECT * FROM _src_" }
   templates:
     - name: create-table
       inputs:
         parameters:
+          - name: src
+          - name: bucket
           - name: database
           - name: table
+          - name: datamartFolder
+          - name: select
       serviceAccountName: spark
       script:
         image: ghcr.io/opendataplatform/spark-odp:3.2.1
@@ -73,10 +79,10 @@ spec:
           CONF="${CONF} --conf spark.hadoop.fs.s3a.path.style.access=true"
           CONF="${CONF} --conf spark.hadoop.fs.s3a.fast.upload=true"
           CONF="${CONF} --conf spark.driver.host=$(hostname -I)"  # For --deploy-mode client
-          PY_CODE="https://n0.minio1:9000/spark-sapp/py/create_table.py"
+          JAR="https://n0.minio1:9000/spark-sapp/jars/simpleapp-0.1.0-uber.jar"
           set -x
           set -f
-          /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-awf-py $CONF $PY_CODE \
-            --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --datamartFolder /warehouse/sapp.db \
+          /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-awf-java1 --class simpleapp.CreateTable $CONF  $JAR \
+            --src "{{ inputs.parameters.src }}"  --bucket {{ inputs.parameters.bucket }} --datamartFolder "{{ inputs.parameters.datamartFolder }}" \
             --database {{ inputs.parameters.database }} --table {{ inputs.parameters.table }} \
-            --select "SELECT * FROM _src_"
+            --select "{{ inputs.parameters.select }}"
