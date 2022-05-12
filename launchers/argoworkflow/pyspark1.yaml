@@ -47,8 +47,8 @@ spec:
                 name: s3access
           - name: NAMESPACE
             value: "spark-sapp-work"
-          - name: HIVE_METASTORE_NAMESPACE
-            value: spark-sapp-sys
+          - name: HIVE_METASTORE_URI
+            value: thrift://hive-metastore.spark-sapp-sys.svc:9083
         command: [bash]
         source: |
           CONF="--conf spark.kubernetes.container.image=ghcr.io/opendataplatform/spark-odp:3.2.1"
@@ -66,7 +66,7 @@ spec:
           CONF="${CONF} --conf spark.eventLog.enabled=true"
           CONF="${CONF} --conf spark.eventLog.dir=s3a://${SPARK_BUCKET}/eventlogs"
           CONF="${CONF} --conf spark.kubernetes.file.upload.path=s3a://${SPARK_BUCKET}/shared"
-          CONF="${CONF} --conf spark.hive.metastore.uris=thrift://hive-metastore.${HIVE_METASTORE_NAMESPACE}.svc:9083"
+          CONF="${CONF} --conf spark.hive.metastore.uris=${HIVE_METASTORE_URI}"
           CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
           CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
           # These are default values. Need to be redefined here as default file is overrided, by mounting /opt/spark/conf folder

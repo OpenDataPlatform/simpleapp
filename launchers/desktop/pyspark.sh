@@ -6,7 +6,7 @@ export KUBECONFIG=${MYDIR}/../../kubeconfigs/spark-sapp-work.spark
 
 # Theses variable must be adjusted to match environment:
 NAMESPACE="spark-sapp-work"
-HIVE_METASTORE_NAMESPACE=spark-sapp-sys
+HIVE_METASTORE_URI="thrift://hive-metastore.spark-sapp-sys.svc:9083"
 SPARK_BUCKET="spark-sapp"
 S3_ENDPOINT="https://n0.minio1:9000/"
 S3_ACCESS_KEY=spark-sapp
@@ -37,7 +37,7 @@ CONF="${CONF} --conf spark.eventLog.dir=s3a://${SPARK_BUCKET}/eventlogs"
 CONF="${CONF} --conf spark.hadoop.fs.s3a.endpoint=${S3_ENDPOINT}"
 CONF="${CONF} --conf spark.hadoop.fs.s3a.access.key=${S3_ACCESS_KEY}"
 CONF="${CONF} --conf spark.hadoop.fs.s3a.secret.key=${S3_SECRET_KEY}"
-CONF="${CONF} --conf spark.hive.metastore.uris=thrift://hive-metastore.${HIVE_METASTORE_NAMESPACE}.svc:9083"
+CONF="${CONF} --conf spark.hive.metastore.uris=${HIVE_METASTORE_URI}"
 CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
 

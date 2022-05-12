@@ -108,7 +108,7 @@ which will be used by all pods using a `envFrom.[]configMapRef` directive.
 
 See the [HowTo](./howto.md) for example of usage.
 
-### Variables
+### confBuilder.sh variables
 
 Here is a description of all environment variable which can be set:
 
@@ -133,3 +133,4 @@ Here is a description of all environment variable which can be set:
 
 Also, this script add `spark.driver.host=$(hostname -I)`. This is required in client deployment mode in a Kubernetes context.
 
+The source code of this script can be found [here](https://github.com/OpenDataPlatform/kdc01/blob/master/addons/spark/docker/odp/confBuilder.sh)
