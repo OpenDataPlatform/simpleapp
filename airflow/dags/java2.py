@@ -27,7 +27,9 @@ with DAG(
         service_account_name="spark",
         image="ghcr.io/opendataplatform/spark-odp:3.2.1",
         image_pull_policy="Always",
-        env_vars={},
+        env_vars={
+            "EXECUTOR_LIMIT_CORES": "1800m",    # Default value overriding
+        },
         configmaps=["sapp-default"],
         secrets = [secret_access_key, secret_secret_key],
         cmds=["/bin/sh", "-c", """

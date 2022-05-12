@@ -5,7 +5,7 @@
 ## Index
 
 - [Introduction](#introduction)
-  - [The sample (and simple) application](#the-sample-and-simple-application)
+  - [The sample (and simple) CreateTable application](#the-sample-and-simple-createtable-application)
 - [Launch from a local Spark deployment](#launch-from-a-local-spark-deployment)
   - [Java](#java)
   - [Python](#python)

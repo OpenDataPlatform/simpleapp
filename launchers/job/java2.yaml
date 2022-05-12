@@ -18,6 +18,8 @@ spec:
             - configMapRef:
                 name: sapp-default
           env:
+            - name: EXECUTOR_LIMIT_CORES    # Default value overriding
+              value: "1800m"
             - name: S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
