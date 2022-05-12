@@ -33,8 +33,8 @@
 
 Following your inscription to the OpenDataPlatform service offer, the following information should have been provided:
 
-- A dedicated namespace spark-<clientId>-work
-- A dedicated S3 bucket spark-<clientId> and its access information (endpoint/access key/secret key) stored in a secret
+- A dedicated namespace `spark-<clientId>-work`
+- A dedicated S3 bucket `spark-<clientId>` and its access information (endpoint/access key/secret key) stored in a secret
 - Your dedicated Hive Metastore URI access
 - A dedicated Jupyter Hub URL access
 - A dedicated Spark History server URL access
@@ -47,7 +47,7 @@ Beside this, your account should belong to a group which have been granted with 
 
 There are several way to launch a Spark job on Kubernetes with ODP, depending on the context and user's preference. You can:
 
-- Issue a spark-submit from your desktop
+- Issue a `spark-submit` from your desktop
 - Launch the Spark job as a Kubernetes Job or CronJob
 - Launch the Spark job using the [Spark Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator) (One shot, or scheduled)
 - Launch the Spark job as a task from a generic workflow manager, such as [Argo Workflow](https://argoproj.github.io/argo-workflows/) or [Airflow](https://airflow.apache.org/)
@@ -63,19 +63,19 @@ On top of that, there are other variations:
 
 ### The sample (and simple) CreateTable application
 
-This HowTo is built around a sample application, which must be as simple as possible, to keep focus on launching method.
+This *HowTo* is built around a sample application, which must be as simple as possible, to keep focus on launching method.
 
 This application will:
 - Read a `.csv` file
 - Store data in `parquet` format, as a external Hive table, to validate usage of the Hive Metastore. This is achieved by using a Create Table As Select (CTAS) request.
 - Perform a count(*) to check table good health.
 
-The beauty of Spark is that all this can be expressed in a couple of line of code.
+The beauty of Spark is that all this can be expressed in a couple lines of code.
 
 The schema of the target table is defined by the SELECT part of the CTAS. This is configurable. For 
 this sample, we will use `SELECT * FROM _src`, thus building the table with all fields of the `.csv` source file.
 
-As data source, we will use a `city_temperature.csv` file, providing dayly temperature on several cities, worlwide. But note this sample does not depend of the input schema. 
+As data source, we will use a `city_temperature.csv` file, providing dayly temperature on several cities, worlwide. But note the code does not depends on input schema and could be used as is for other data set.. 
 
 There is a [java version](../java/src/main/java/simpleapp/CreateTable.java) and [pyspark version](../py/create_table.py) of this application. Both use the same set of input parameters
 
@@ -104,7 +104,7 @@ set -f
 SELECT='SELECT * FROM _src_'
 ```
 
-(Note the `set -f` to prevent shell expansion of the '*' in the SELECT )
+> Note the `set -f` to prevent shell expansion of the '*' in the SELECT
 
 Then you will find a bunch on configuration settings, required for correct spark execution:
 
@@ -127,7 +127,7 @@ ${SPARK_HOME}/bin/spark-submit --master k8s://${K8S_API_SERVER} --deploy-mode cl
 Note the following:
 
 - The deployment is in `cluster mode`. This means both drivers and executor will be launched inside the Kubernetes cluster. 
-- The --master option is specific a a Kubernetes deployment.
+- The --master option is specific for a Kubernetes deployment.
 - The `spark-submit` command will upload the application jar file onto the S3 storage. This means your workstation must 
   recognize the server certificate as valid (Issued by a registered certificate authority). If this is not the case, a 
   workaround is to disable the certificate check on S3 API by setting the appropriate variable: `export JAVA_TOOL_OPTIONS="-Dcom.amazonaws.sdk.disableCertChecking=true"`
