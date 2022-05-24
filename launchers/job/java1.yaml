@@ -19,6 +19,10 @@ spec:
               value: "spark-sapp"
             - name: S3_ENDPOINT
               value: "https://n0.minio1:9000/"
+            - name: NAMESPACE
+              value: "spark-sapp-work"
+            - name: HIVE_METASTORE_URI
+              value: thrift://hive-metastore.spark-sapp-sys.svc:9083
             - name: S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
@@ -29,10 +33,6 @@ spec:
                 secretKeyRef:
                   key: secretKey
                   name: s3access
-            - name: NAMESPACE
-              value: "spark-sapp-work"
-            - name: HIVE_METASTORE_URI
-              value: thrift://hive-metastore.spark-sapp-sys.svc:9083
           command:
             - "/bin/sh"
             - -c

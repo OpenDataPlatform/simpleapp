@@ -13,7 +13,7 @@ Note all these image include support for both amd64 and arm64 platforms
 - [Spark-odp image](#spark-odp-image)
 - [Spark operator image](#spark-operator-image)
 - [The `confBuilder.sh` script](#the-confbuildersh-script)
-  - [Variables](#variables)
+  - [confBuilder.sh variables](#confbuildersh-variables)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
