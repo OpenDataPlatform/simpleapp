@@ -50,7 +50,7 @@ It include a set of modifications allowing smooth integration in OpenDataPlatfom
 
   A basic log4j configuration is provided.
 
-- confBuilder.sh script
+- `confBuilder.sh` script
 
   When used as Spark client, an helper script may be used to ease configuration. See below for a full description
 

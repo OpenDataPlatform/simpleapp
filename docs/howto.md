@@ -11,7 +11,7 @@
 - [Preparation](#preparation)
 - [Launching from a local Spark deployment](#launching-from-a-local-spark-deployment)
 - [Launch as a Kubernetes Job](#launch-as-a-kubernetes-job)
-- [Launch from Jupiter notebook](#launch-from-jupiter-notebook)
+- [Launch from Jupyter notebook](#launch-from-jupyter-notebook)
 - [Launch as a Spark Operator SparkApplication](#launch-as-a-spark-operator-sparkapplication)
 - [Launch as an Argo Workflow task](#launch-as-an-argo-workflow-task)
 - [Launch as an Apache Airflow task](#launch-as-an-apache-airflow-task)
@@ -21,20 +21,19 @@
 
 ## Introduction
 
-This HowTo is aimed to 
-What this doc is?
-What this doc is not?
+This HowTo is aimed to help you getting started with the OpenDataPlatform service offer. As such, it focus on the specifity of this environment.
 
+It is assumed the reader has a basic understanding of Spark concepts and is familiar to Kubernetes basic usage and associated tools (kubectl, ....) and concepts (Namespace, Pods, ConfigMap, Secrets, ServiceAccount...)
 
 ### Prerequisites
 
-Following your inscription to the OpenDataPlatform service offer, the following information should have been provided:
+Following your inscription to the OpenDataPlatform service offer, the following resources should have been provided:
 
 - A dedicated namespace `spark-<clientId>-work`
 - A dedicated S3 bucket `spark-<clientId>` and its access information (endpoint/access key/secret key).
-- Your dedicated Hive Metastore URI access
+- A dedicated Hive Metastore URI access
 - A dedicated Jupyter Hub URL access
-- A dedicated Spark History server URL access
+- A dedicated Spark History Server URL access
 
 These informations will be used for configuring your application(s).
 
@@ -69,6 +68,8 @@ This application will:
 
 The beauty of Spark is that all this can be expressed in a couple lines of code.
 
+This application is higly configurable, using a set of input parameters on the command line.
+
 The schema of the target table is defined by the SELECT part of the CTAS. This is configurable. For 
 this sample, we will use `SELECT * FROM _src_`, thus building the table with all fields of the `.csv` source file (By convention, `_src_` is the name of the view on the source dataset).
 
@@ -78,7 +79,7 @@ There is a [java version](../java/src/main/java/simpleapp/CreateTable.java) and 
 
 ## Preparation
 
-Some use cases described here require a small set of dependencies.
+Depending of the use cases described below, a small set of dependencies may be required
 
 - The sample data set must be loaded on S3, in a well known location.
 - A kubernetes `Secret` must be created to host accessKey/secretKey for S3 access. There is a [script](../tools/s3secret.sh) to help for this.
@@ -88,7 +89,7 @@ Some use cases described here require a small set of dependencies.
 
 This launch method is mainly used in primary development stages. It assume a Spark client environment has been deployed on you local computer.
 
-As matter of starting point, a [Java](../launchers/desktop/java.sh) and [Pyspark](../launchers/desktop/pyspark.sh) version of launching script are provided.
+As matter of starting point, a [Java](../launchers/desktop/java.sh) and [PySpark](../launchers/desktop/pyspark.sh) version of launching script are provided.
 
 First you may ensure your current account is granted with enough rights to perform Spark deployment. 
 If not you may have been provided with a config file, which must be defined by a `KUBECONFIG` environment variable.
@@ -132,22 +133,22 @@ ${SPARK_HOME}/bin/spark-submit --master k8s://${K8S_API_SERVER} --deploy-mode cl
 Note the following:
 
 - The deployment is in `cluster mode`. This means both drivers and executor will be launched inside the Kubernetes cluster. 
-- The --master option is specific for a Kubernetes deployment.
+- The `--master` option is specific for a Kubernetes deployment.
 - The `spark-submit` command will upload the application jar file onto the S3 storage. This means your workstation must 
   recognize the server certificate as valid (Issued by a registered certificate authority). If this is not the case, a 
   workaround is to disable the certificate check on S3 API by setting the appropriate variable: `export JAVA_TOOL_OPTIONS="-Dcom.amazonaws.sdk.disableCertChecking=true"`
 
-The pyspark version is almost the same, excepted the `--class` parameter is removed and $JAR is replaced by $PY_FILE.
+The PySpark version is almost the same, excepted the `--class` parameter is removed and $JAR is replaced by $PY_FILE.
 
 After adapting the script, you should be able to launch your first Spark job on Kubernetes. On success, you should be able to log on the Spark history server to view Spark stagging.
 
 ## Launch as a Kubernetes Job
 
-Kubernetes Jobs and CronJob are appropriate tools to launch Spark task, either on one shot or on schedule.
+Kubernetes `Jobs` and `CronJobs` are appropriate tools to launch Spark task, either on one shot or on schedule.
 
 A good point is launching a Spark application this way does not require any local Spark deployment. Just access to the Kubernetes cluster with appropriate permissions.
 
-Two sample jobs are provided here. One for [Java](../launchers/job/java1.yaml) and one for [Pyspark](../launchers/job/pyspark1.yaml).
+Two sample jobs are provided here. One for [Java](../launchers/job/java1.yaml) and one for [PySpark](../launchers/job/pyspark1.yaml).
 
 Most of the context related value are defined as environment variables. You will need to modify them:
 
@@ -202,6 +203,8 @@ The application code will be fetched using http(s):
      PY_CODE="https://n0.minio1:9000/spark-sapp/py/create_table.py"
 ```
 
+Of course, this should be adjusted to where you stored your code.
+
 An alternate solution would be to embed application code in the Docker image. More on this later.
 
 And the spark-submit at the end:
@@ -216,12 +219,47 @@ We use the `client` mode. This means the job is in fact the driver. The 'cluster
 
 - 1 more intermediate pod. More moving part. More logs to scan, more used resources.
 - The kubernetes Job subsystem provide a cleanup mechanism for completed jobs (`ttlSecondsAfterFinished: 200` in our sample). 
-Unfortunately, Spark does not set `ownerReference` relationship, between the job's pod and the driver. So, the driver pod will remain indefinitely in `Completed` stage, so will need some manual cleanup.
+Unfortunately, Spark does not set `ownerReference` relationship, between the job's pod and the driver. So, the driver pod will remain indefinitely in `Completed` stage, and will need some manual cleanup.
 
-  
-## Launch from Jupiter notebook
+## Launch from Jupyter notebook
+
+A sample PySpark notebook is provided [here](../launchers/jupyter/pyspark.ipynb)
+
+All context related value are defined as Python variables, at the top of the file. You will need to modify them, according to your configuration:
+
+```jupyter
+# To adjust to our context
+NAMESPACE = "spark-sapp-work"
+HIVE_METASTORE_URI = "thrift://hive-metastore.spark-sapp-sys.svc:9083"
+SPARK_BUCKET = "spark-sapp"
+S3_ENDPOINT = "https://n0.minio1:9000/"
+S3_ACCESS_KEY = "spark-sapp"
+S3_SECRET_KEY = "xxxxxxxxxxxxxxxxxxxxxx"
+S3_SSL="true"
+OAUTH_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ik92a2tYVFhwbVNndUR0QnZDLTVsSkFIRk1sR0VuWWdJbE5qVXZNTUZlQkkifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzcGFyay1zYXBwLXdvcmsiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic3BhcmstdG9rZW4tbWN2NHMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoic3BhcmsiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJhNzIwZDUwZC04MTk2LTQwZTEtOGZiYi0zNTJmYmRkODkyYTUiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6c3Bhcmstc2FwcC13b3JrOnNwYXJrIn0.pwkhBXy7hOILG-KYG2ImER5-kJDlmwRkw0a04ACszWSYjBnOXoToTLdBo8v2GZYETzw1-2t1ja62qW1YvxEgOwSwnHQTeh87qi3mYhl1e37-OFj0X4YCrt41cMfBQUJaxo8uX-xV-98INB4GtdkgE2aSP1roNZj1ft-SwVC_tXx3GvWm4lhDGxQ7uuxtVzc2xEXZBffSsXUpm-fKzqatT3x3hQVRD4TNLF0DoU84LnbPyPz8ZcAt9zF4apJWBaHQJnVcoK-OnW4nnhQng6ffI-qKqKvwi89-Irfc5FrW5cl9nj3CWtos_W889VPk8UN_6M2DLHRtFec6L5SlU2fWQQ"
+```
+
+The must trickest part is to provide an authentication token for the 'spark' ServiceAccount. The following command will do the job;
+ 
+```
+kubectl -n spark-sapp-work describe secret $(kubectl -n spark-sapp-work get secret | (grep spark || echo "$_") | awk '{print $1}') | grep token: | awk '{print $2}'
+```
+
+After the two first steps, which initialise the Spark Session (Thus launching spark executors), the remaining of the notebook will act as the sample application described above.
 
 ## Launch as a Spark Operator SparkApplication
+
+An alternate way to launch a spark job is to use a ad-hoc operator, such as google [spark-on-k8s-operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator).
+
+It will allow to launch a Spark job by applying a Kubernetes manifest. Two Custom Resource Definitions are provided: `SparkApplication` and `ScheduledSparkApplication`.
+
+Two sample manifests are provided here. One for [Java](../launchers/sparkoperator/java.yaml) and one for [PySpark](../launchers/sparkoperator/pyspark.yaml).
+
+You will need to adjust some parameters in the `arguments` ans `sparkConf` properties. 
+
+Also, adjust the `mainApplicationFile` property to target where you stored your code.
+
+Note than this approach is quite redundant with launching a Spark job using the Kubernetes `Jobs` (and `Cronjobs`) facility, as decribed above. 
 
 ## Launch as an Argo Workflow task 
 
