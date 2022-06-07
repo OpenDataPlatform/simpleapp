@@ -4,20 +4,25 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Index
 
-- [Introduction](#introduction)
-  - [Prerequisites](#prerequisites)
-  - [Spark job launching](#spark-job-launching)
-  - [The sample (and simple) CreateTable application](#the-sample-and-simple-createtable-application)
-- [Preparation](#preparation)
-- [Launching from a local Spark deployment](#launching-from-a-local-spark-deployment)
-- [Launch as a Kubernetes Job](#launch-as-a-kubernetes-job)
-- [Launch from Jupyter notebook](#launch-from-jupyter-notebook)
-- [Launch as a Spark Operator SparkApplication](#launch-as-a-spark-operator-sparkapplication)
-- [Launch as an Argo Workflow task](#launch-as-an-argo-workflow-task)
-- [Launch as an Apache Airflow task](#launch-as-an-apache-airflow-task)
-- [The `confBuilder.sh` script](#the-confbuildersh-script)
-  - [confBuilder.sh variables](#confbuildersh-variables)
-- [Variations](#variations)
+  - [Introduction](#introduction)
+    - [Prerequisites](#prerequisites)
+    - [Spark job launching](#spark-job-launching)
+    - [The sample (and simple) CreateTable application](#the-sample-and-simple-createtable-application)
+  - [Preparation](#preparation)
+  - [Launching from a local Spark deployment](#launching-from-a-local-spark-deployment)
+  - [Launch as a Kubernetes Job](#launch-as-a-kubernetes-job)
+  - [Launch from Jupyter notebook](#launch-from-jupyter-notebook)
+  - [Launch as a Spark Operator SparkApplication](#launch-as-a-spark-operator-sparkapplication)
+  - [Launch as an Argo Workflow task](#launch-as-an-argo-workflow-task)
+  - [Launch as an Apache Airflow task](#launch-as-an-apache-airflow-task)
+  - [The `confBuilder.sh` script](#the-confbuildersh-script)
+    - [confBuilder.sh variables](#confbuildersh-variables)
+  - [Embed application code in image](#embed-application-code-in-image)
+  - [Embed application code to launcher (python)](#embed-application-code-to-launcher-python)
+- [The OpenDataPlatform provided images](#the-opendataplatform-provided-images)
+  - [Standard Spark base image (spark:3.2.1 and spark-py:3.2.1)](#standard-spark-base-image-spark321-and-spark-py321)
+  - [Spark-odp image](#spark-odp-image)
+  - [Spark operator image](#spark-operator-image)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -397,7 +402,6 @@ and [here for its PySpark version](https://github.com/OpenDataPlatform/simpleapp
 
 The structure of the dag is quite similar to the one of the Kubernetes Job described in a previous chapter. Except the Pod is defined as a Python object. 
 
-
 ## The `confBuilder.sh` script
 
 When submitting a Spark application, a bunch of options must be provided, typically using the `--conf` parameter. A typical submit operation may look like this:
@@ -437,18 +441,45 @@ Also, for most of the jobs part of an application, most of the parameters are th
 To make life more easy, the `confBuilder.sh` script has been included in `spark-odp image`. It will build the $CONF variable with:
 
 - A set of constant value, specific to the OpenDataPlatform usage (Most of them being related to S3 access)
-- A set of variable value, provided as environment variable.
+- A set of variable value, provided as environment variables.
+
+With this script, the last part of the manifests will be simplified, like the following:
+
+```
+      command:
+        - "/bin/sh"
+        - -c
+        - |
+          JAR="https://n0.minio1:9000/spark-sapp/jars/simpleapp-0.1.0-uber.jar"
+          . /opt/confBuilder.sh
+          set -x
+          set -f
+          /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-java2 --class simpleapp.CreateTable $CONF  $JAR \
+            --src "s3a://${SPARK_BUCKET}/data/city_temperature.csv"  --bucket ${SPARK_BUCKET} --database sapp --table ctemp_job_java2 --datamartFolder /warehouse/sapp.db \
+            --select "SELECT * FROM _src_"
+```
 
 In a Kubernetes context, the practice will be to define a set of default parameters for an application in a ConfigMap,
-which will be used by all pods using a `envFrom.[]configMapRef` directive.
+which will be used by all pods using a `envFrom.[]configMapRef` directive, like the following:
+
+```
+          envFrom:
+            - configMapRef:
+                name: sapp-default
+          env:
+            - name: EXECUTOR_LIMIT_CORES    # Default value overriding
+              value: "1800m"
+```
+
+As the variables defined in `env` take precedence over the ones defined in `envFrom`, we can override the defaut values, as `EXECUTOR_LIMIT_CORES` in the previous sample.
 
 To define such ConfigMap, [here is a good starting point](https://github.com/OpenDataPlatform/simpleapp/blob/main/tools/sapp-default.sh)
 
-Below are links for example of `confBuilder.sh`:
+Below are links for examples of `confBuilder.sh`:
 
-Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java2.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark2.yaml)
-Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java2.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark2.yaml)
-Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java2.py) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark2.py)
+- Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java2.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark2.yaml)
+- Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java2.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark2.yaml)
+- Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java2.py) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark2.py)
 
 ### confBuilder.sh variables
 
@@ -477,10 +508,139 @@ Also, this script add `spark.driver.host=$(hostname -I)`. This is required in cl
 
 The source code of this script can be found [here](https://github.com/OpenDataPlatform/kdc01/blob/master/addons/spark/docker/odp/confBuilder.sh)
 
-## Variations
+## Embed application code in image
 
-- Add application code to launcher (python)
-- Embed application code in image
+In most of previous samples, the application code is made available for drivers and executors as an https link.
 
+Another approach coud be to include this application code in a specifc image.
 
+The Dockerfile may look like this:
 
+```
+ARG img_base
+
+FROM ${img_base}
+
+# For this HowTo, embed both Java and Python version of the application
+COPY py/create_table.py /opt/
+ARG sapp_version
+COPY java/build/libs/simpleapp-${sapp_version}-uber.jar /opt/
+```
+
+And the build command may look like this: 
+
+```
+docker build --push  --build-arg img_base=${DOCKER_REPO}/spark-odp:${ODP_TAG} --build-arg sapp_version=${SAPP_TAG} -t $(DOCKER_REPO)/sapp:${SAPP_TAG} -f Dockerfile .
+```
+
+Then, in your manifest, you can refer to you code:
+
+```
+    JAR="local:///opt/simpleapp-0.1.0-uber.jar"
+    # or
+    PY_CODE="local:///opt/create_table.py"
+```
+
+And, of course, don't forget to change the image:
+
+```
+   image: "ghcr.io/opendataplatform/sapp:0.1.0"
+```
+
+This approach could be appropriate if you have a smooth CI/CD chain.
+
+Below are links for examples:
+
+- Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java3.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark3.yaml)
+- Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java3.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark3.yaml)
+- Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java3.py) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark3.py)
+
+## Embed application code to launcher (python)
+
+Here is another pattern, if you use pyspark and if your application code is made of few lines. Your code can be embded your code directly in the manifest, like the following:
+
+```
+      command:
+        - "/bin/sh"
+        - -c
+        - |
+          cat >/tmp/work.py <<EOF
+          # -------------------------------------
+          from pyspark.sql import SparkSession
+          import sys
+          spark = SparkSession.builder.enableHiveSupport().getOrCreate()
+          df = spark.read.options(header='True', inferSchema='True', delimiter=",").csv("${SRC}")
+          df.createOrReplaceTempView("_src_")
+          df.show()
+          spark.sql("CREATE DATABASE IF NOT EXISTS ${DATABASE}")
+          spark.sql("DROP TABLE IF EXISTS ${DATABASE}.${TABLE}")
+          spark.sql("CREATE TABLE IF NOT EXISTS ${DATABASE}.${TABLE} USING PARQUET LOCATION 's3a://${SPARK_BUCKET}/${DATAMART_FOLDER}/${TABLE}' AS ${SELECT}")
+          spark.sql("SHOW TABLES FROM ${DATABASE}").show()
+          spark.sql("DESCRIBE TABLE ${DATABASE}.${TABLE}").show()
+          spark.sql("SELECT COUNT(*) FROM ${DATABASE}.${TABLE}").show()
+          spark.stop()
+          sys.exit(0)
+          EOF
+          # -------------------------------------
+          PY_CODE="/tmp/work.py"
+          . /opt/confBuilder.sh
+          set -x
+          set -f
+          /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-py4 $CONF $PY_CODE
+```
+
+Below are links for full examples:
+
+- Example for [Kubernetes Jobs](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark4.yaml)
+- Example for [Argo Workflow](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark4.yaml)
+- Example for [Apache Airflow](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark4.py)
+
+# The OpenDataPlatform provided images
+
+Here is a short description of docker images you may use for Spark application in OpenDataPlatform
+
+Note all these image include support for both amd64 and arm64 platforms
+
+## Standard Spark base image (spark:3.2.1 and spark-py:3.2.1)
+
+There are images build from the [documented spark procedure](https://spark.apache.org/docs/latest/running-on-kubernetes.html#docker-images), with no modification.
+
+The image including the Python langage binding will be used as a base for the spark-odp image. Note it also support all JVM based application.
+
+This image is just an intermediate step and should not be used as is in OpenDataPlatform context.
+
+## Spark-odp image
+
+This image is one of the key pieces of the OpenDataPlatform service offer.
+
+It is built from the standard Spark-py base image and may be used in many context, both as Spark Driver or Spark Executor
+
+It include a set of modifications allowing smooth integration in OpenDataPlatfom context.
+
+- Run as non root
+
+  The standard Spark image run with a user ID of 185. A `spark` user is created with this ID.
+
+- s3 access
+
+  Access to s3 storage require some extra jar to be included in the spark classpath.
+
+- Certificate(s)
+
+  Certificate(s) required to access external resources are copied in the image and stored in the java keystore.
+
+- log4j configuration
+
+  A basic log4j configuration is provided.
+
+- `confBuilder.sh` script
+
+  When used as Spark client, an helper script may be used to ease configuration. See below for a full description
+
+## Spark operator image
+
+This is a rebuild of the spark-operator image, based on spark-odp. Aim is to provide:
+
+- Coherency of the spark version on all images
+- Support run as non root.
+- multiplatform support

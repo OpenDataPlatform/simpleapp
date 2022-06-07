@@ -28,7 +28,6 @@ help: ## Display this help.
 
 doc: ## Generate doc index
 	doctoc docs/howto.md --github --title '## Index'
-	doctoc docs/spark-odp-image.md --github --title '## Index'
 
 prepare: toolsexec kubeconfig upload-data upload-code s3secret ## handle all prerequisites
 
