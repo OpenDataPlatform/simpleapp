@@ -39,5 +39,5 @@ spec:
               set -x
               set -f
               /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-java3 --class simpleapp.CreateTable $CONF  $JAR \
-                --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_job_java3 --datamartFolder /warehouse/sapp.db \
+                --src "s3a://${SPARK_BUCKET}/data/city_temperature.csv"  --bucket ${SPARK_BUCKET} --database sapp --table ctemp_job_java3 --datamartFolder /warehouse/sapp.db \
                 --select "SELECT * FROM _src_"

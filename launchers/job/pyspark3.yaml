@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ctemp-job-py2
+  name: ctemp-job-py3
   namespace: spark-sapp-work
 spec:
   ttlSecondsAfterFinished: 200
@@ -37,5 +37,5 @@ spec:
               set -x
               set -f
               /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-py3 $CONF $PY_CODE \
-              --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_job_py3 --datamartFolder /warehouse/sapp.db \
+              --src "s3a://${SPARK_BUCKET}/data/city_temperature.csv"  --bucket ${SPARK_BUCKET} --database sapp --table ctemp_job_py3 --datamartFolder /warehouse/sapp.db \
               --select "SELECT * FROM _src_"

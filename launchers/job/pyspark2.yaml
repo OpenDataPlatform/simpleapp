@@ -18,6 +18,8 @@ spec:
             - configMapRef:
                 name: sapp-default
           env:
+            - name: EXECUTOR_LIMIT_CORES    # Default value overriding
+              value: "1800m"
             - name: S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
@@ -37,5 +39,5 @@ spec:
               set -x
               set -f
               /opt/spark/bin/spark-submit --master k8s://https://kubernetes.default.svc --deploy-mode client --name ctemp-job-py2 $CONF $PY_CODE \
-              --src "s3a://spark-sapp/data/city_temperature.csv"  --bucket spark-sapp --database sapp --table ctemp_job_py2 --datamartFolder /warehouse/sapp.db \
+              --src "s3a://${SPARK_BUCKET}/data/city_temperature.csv"  --bucket ${SPARK_BUCKET} --database sapp --table ctemp_job_py2 --datamartFolder /warehouse/sapp.db \
               --select "SELECT * FROM _src_"
