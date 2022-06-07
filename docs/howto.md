@@ -477,9 +477,9 @@ To define such ConfigMap, [here is a good starting point](https://github.com/Ope
 
 Below are links for examples of `confBuilder.sh`:
 
-- Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java2.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark2.yaml)
-- Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java2.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark2.yaml)
-- Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java2.py) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark2.py)
+- Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java2.yaml) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark2.yaml)
+- Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java2.yaml) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark2.yaml)
+- Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java2.py) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark2.py)
 
 ### confBuilder.sh variables
 
@@ -541,19 +541,15 @@ Then, in your manifest, you can refer to you code:
     PY_CODE="local:///opt/create_table.py"
 ```
 
-And, of course, don't forget to change the image:
-
-```
-   image: "ghcr.io/opendataplatform/sapp:0.1.0"
-```
+And, of course, don't forget to change the image in your manifest.
 
 This approach could be appropriate if you have a smooth CI/CD chain.
 
 Below are links for examples:
 
-- Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java3.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark3.yaml)
-- Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java3.yaml) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark3.yaml)
-- Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java3.py) [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark3.py)
+- Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java3.yaml) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark3.yaml)
+- Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java3.yaml) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark3.yaml)
+- Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java3.py) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark3.py)
 
 ## Embed application code to launcher (python)
 
