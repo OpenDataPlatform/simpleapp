@@ -1,12 +1,6 @@
 
-MC_ALIAS := minio1
-BUCKET := spark-sapp
-NAMESPACE := spark-sapp-work
-SERVICE_ACCOUNT := spark
-S3_ACCESS_KEY := spark-sapp
-S3_SECRET_KEY := pd2t3yiizB0hTRjQOiIMihNNwMGeBM9P1vd1We2cUK1_MrAkRzY4qg==
-S3_ENDPOINT := https://n0.minio1:9000/
-HIVE_METASTORE_NAMESPACE := spark-sapp-sys
+include Makefile.d/current.mk
+
 ODP_TAG := 3.2.1
 SAPP_TAG := 0.1.0
 
@@ -29,7 +23,8 @@ help: ## Display this help.
 doc: ## Generate doc index
 	doctoc README.md --github --title '## Index'
 
-prepare: toolsexec kubeconfig upload-data upload-code s3secret ## handle all prerequisites
+.PHONY: prepare
+prepare: toolsexec kubeconfig upload-data upload-code s3secret  sapp-default ## handle all prerequisites
 
 ##@ Prerequisites
 

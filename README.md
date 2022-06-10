@@ -485,24 +485,24 @@ Below are links for examples of `confBuilder.sh`:
 
 Here is a description of all environment variable which can be set:
 
-| Name                          | req | Corresponding Spark configuration value                                                    | Comment                                             |
-|-------------------------------|-----|--------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| SPARK_CONTAINER_IMAGE         | No  | spark.kubernetes.executor.container.image and<br>spark.kubernetes.executor.container.image | Defaut to `ghcr.io/opendataplatform/spark-odp:3.2.1` |
-| IMAGE_PULL_POLICY             | No  | spark.kubernetes.container.image.pullPolicy                                                | Default: `IfNotPresent`                             |
-| EXECUTOR_SERVICE_ACCOUNT_NAME | No  | spark.kubernetes.authenticate.executor.serviceAccountName                                  | Default: `spark`                                    |
-| S3_CONNECTION_SSL_ENABLED     | No  | spark.hadoop.fs.s3a.connection.ssl.enabled                                                 | Default: `true`                                     |
-| S3_ENDPOINT                   | Yes | spark.hadoop.fs.s3a.endpoint                                                               |                                                     |
-| S3_ACCESS_KEY                 | Yes | spark.hadoop.fs.s3a.access.key                                                             |                                                     |
-| S3_SECRET_KEY                 | Yes | spark.hadoop.fs.s3a.secret.key                                                             |                                                     |
-| NAMESPACE                     | Yes | spark.kubernetes.namespace                                                                 |                                                     |
-| EXECUTOR_INSTANCES            | Yes | spark.executor.instances                                                                   |                                                     |
-| EXECUTOR_LIMIT_CORES          | Yes | spark.kubernetes.executor.limit.cores                                                      |                                                     |
-| EXECUTOR_REQUEST_CORES        | Yes | spark.kubernetes.executor.request.cores                                                    |                                                     |
-| EXECUTOR_MEMORY               | Yes | spark.executor.memory                                                                      |                                                     |
-| EVENT_LOG_DIR                 | No  | spark.eventLog.dir                                                                         | Is set, then `spark.eventLog.enabled=true` is added |
-| FILE_UPLOAD_PATH              | No  | spark.kubernetes.file.upload.path                                                          |                                                     |
-| HIVE_METASTORE_URI            | No  | spark.hive.metastore.uris                                                                  |                                                     |
-| SQL_WAREHOUSE_DIR             | No  | spark.sql.warehouse.dir and<br>hive.metastore.warehouse.dir                                |                                                     |
+| Name                          | req | Corresponding Spark configuration value                                             | Comment                                             |
+|-------------------------------|-----|-------------------------------------------------------------------------------------|-----------------------------------------------------|
+| SPARK_CONTAINER_IMAGE         | No  | spark.kubernetes.container.image and<br>spark.kubernetes.executor.container.image   | Defaut to `ghcr.io/opendataplatform/spark-odp:3.2.1` |
+| IMAGE_PULL_POLICY             | No  | spark.kubernetes.container.image.pullPolicy                                         | Default: `IfNotPresent`                             |
+| EXECUTOR_SERVICE_ACCOUNT_NAME | No  | spark.kubernetes.authenticate.executor.serviceAccountName                           | Default: `spark`                                    |
+| S3_CONNECTION_SSL_ENABLED     | No  | spark.hadoop.fs.s3a.connection.ssl.enabled                                          | Default: `true`                                     |
+| S3_ENDPOINT                   | Yes | spark.hadoop.fs.s3a.endpoint                                                        |                                                     |
+| S3_ACCESS_KEY                 | Yes | spark.hadoop.fs.s3a.access.key                                                      |                                                     |
+| S3_SECRET_KEY                 | Yes | spark.hadoop.fs.s3a.secret.key                                                      |                                                     |
+| NAMESPACE                     | Yes | spark.kubernetes.namespace                                                          |                                                     |
+| EXECUTOR_INSTANCES            | Yes | spark.executor.instances                                                            |                                                     |
+| EXECUTOR_LIMIT_CORES          | Yes | spark.kubernetes.executor.limit.cores                                               |                                                     |
+| EXECUTOR_REQUEST_CORES        | Yes | spark.kubernetes.executor.request.cores                                             |                                                     |
+| EXECUTOR_MEMORY               | Yes | spark.executor.memory                                                               |                                                     |
+| EVENT_LOG_DIR                 | No  | spark.eventLog.dir                                                                  | Is set, then `spark.eventLog.enabled=true` is added |
+| FILE_UPLOAD_PATH              | No  | spark.kubernetes.file.upload.path                                                   |                                                     |
+| HIVE_METASTORE_URI            | No  | spark.hive.metastore.uris                                                           |                                                     |
+| SQL_WAREHOUSE_DIR             | No  | spark.sql.warehouse.dir and<br>hive.metastore.warehouse.dir                         |                                                     |
 
 Also, this script add `spark.driver.host=$(hostname -I)`. This is required in client deployment mode in a Kubernetes context.
 
