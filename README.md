@@ -96,7 +96,7 @@ Depending of the use cases described below, a small set of dependencies may be r
 
 This launch method is mainly used in primary development stages. It assume a Spark client environment has been deployed on you local computer.
 
-As matter of starting point, a [Java](../launchers/desktop/java.sh) and [PySpark](../launchers/desktop/pyspark.sh) version of launching script are provided.
+As matter of starting point, a [Java](./launchers/desktop/java.sh) and [PySpark](./launchers/desktop/pyspark.sh) version of launching script are provided.
 
 First you may ensure your current account is granted with enough rights to perform Spark deployment. 
 If not you may have been provided with a config file, which must be defined by a `KUBECONFIG` environment variable.
@@ -155,7 +155,7 @@ Kubernetes `Jobs` and `CronJobs` are appropriate tools to launch Spark task, eit
 
 A good point is launching a Spark application this way does not require any local Spark deployment. Just access to the Kubernetes cluster with appropriate permissions.
 
-Two sample jobs are provided here. One for [Java](../launchers/job/java1.yaml) and one for [PySpark](../launchers/job/pyspark1.yaml).
+Two sample jobs are provided here. One for [Java](./launchers/job/java1.yaml) and one for [PySpark](./launchers/job/pyspark1.yaml).
 
 Most of the context related value are defined as environment variables. You will need to modify them:
 
@@ -186,6 +186,16 @@ Also, note the way the secret values are set in environment variables:
           secretKeyRef:
             key: secretKey
             name: s3access
+```
+
+And note how we set the driver pod name in an environment variable. This will alow to set an `OwnerReference` between 
+the driver and the executor pods, by setting the `spark.kubernetes.driver.pod.name` variable in spark configuration.
+
+```
+    - name: DRIVER_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
 ```
 
 And note this yaml syntax trick to include a multiline script:
@@ -232,7 +242,7 @@ Unfortunately, Spark does not set `ownerReference` relationship, between the job
 
 ## Launch from Jupyter notebook
 
-A sample PySpark notebook is provided [here](../launchers/jupyter/pyspark.ipynb)
+A sample PySpark notebook is provided [here](./launchers/jupyter/pyspark.ipynb)
 
 All context related value are defined as Python variables, at the top of the file. You will need to modify them, according to your configuration:
 
@@ -263,7 +273,7 @@ An alternate way to launch a spark job is to use a ad-hoc operator, such as goog
 
 It will allow to launch a Spark job by applying a Kubernetes manifest. Two Custom Resource Definitions are provided: `SparkApplication` and `ScheduledSparkApplication`.
 
-Two sample manifests are provided here. One for [Java](../launchers/sparkoperator/java.yaml) and one for [PySpark](../launchers/sparkoperator/pyspark.yaml).
+Two sample manifests are provided here. One for [Java](./launchers/sparkoperator/java.yaml) and one for [PySpark](./launchers/sparkoperator/pyspark.yaml).
 
 You will need to adjust some parameters in the `arguments` ans `sparkConf` properties. 
 
@@ -365,6 +375,10 @@ spec:
             value: "spark-sapp-work"
           - name: HIVE_METASTORE_NAMESPACE
             value: spark-sapp-sys
+          - name: DRIVER_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
         command: [bash]
         source: |
           CONF="--conf spark.kubernetes.container.image=ghcr.io/opendataplatform/spark-odp:3.2.1"
@@ -390,7 +404,7 @@ The main difference is, aside environement variables, we have another level of c
 
 A last note: If you dig in Argo Workflow documentation, you will find a feature called 'artifact', which allow moving data between jobs. 
 In our case, as data are located on an S3 storage, which is shared between jobs, passing data between jobs is just matter of passing S3 reference as parameters. 
-So, the Artifact system is useless and not configured in our implementation.     
+So, the Artifact system is useless and not configured in our installation of Argo Workflow.     
 
 ## Launch as an Apache Airflow task
 
