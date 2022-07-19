@@ -36,6 +36,7 @@ toolsexec: ## To execute after git clone
 .PHONY: kubeconfig
 kubeconfig: ## Generate kubeconfig for spark service account
 	./tools/generate-kubeconfig.sh $(NAMESPACE) $(SERVICE_ACCOUNT) ./kubeconfigs/$(NAMESPACE).$(SERVICE_ACCOUNT)
+	cp ./kubeconfigs/$(NAMESPACE).$(SERVICE_ACCOUNT) ./airflow/dags/$(NAMESPACE).$(SERVICE_ACCOUNT)
 
 .PHONY: upload-data
 upload-data: ## upload sample dataset

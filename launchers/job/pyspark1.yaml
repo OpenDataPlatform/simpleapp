@@ -33,6 +33,10 @@ spec:
               value: "spark-sapp-work"
             - name: HIVE_METASTORE_URI
               value: thrift://hive-metastore.spark-sapp-sys.svc:9083
+            - name: DRIVER_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           command:
             - "/bin/sh"
             - -c
@@ -55,6 +59,7 @@ spec:
               CONF="${CONF} --conf spark.hive.metastore.uris=${HIVE_METASTORE_URI}"
               CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
               CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
+              CONF="${CONF} --conf spark.kubernetes.driver.pod.name=${DRIVER_POD_NAME}"
               # These are default values. Need to be redefined here as default file is overrided, by mounting /opt/spark/conf folder
               CONF="${CONF} --conf spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a=org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
               CONF="${CONF} --conf spark.hadoop.fs.s3a.committer.name=directory"

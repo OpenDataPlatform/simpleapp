@@ -28,6 +28,10 @@ spec:
                 secretKeyRef:
                   key: secretKey
                   name: s3access
+            - name: DRIVER_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           command:
             - "/bin/sh"
             - -c

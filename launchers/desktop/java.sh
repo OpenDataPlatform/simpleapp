@@ -2,17 +2,17 @@
 
 MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export KUBECONFIG=${MYDIR}/../../kubeconfigs/spark-sapp-work.spark
-
 # Theses variable must be adjusted to match environment:
 NAMESPACE="spark-sapp-work"
 HIVE_METASTORE_URI="thrift://hive-metastore.spark-sapp-sys.svc:9083"
 SPARK_BUCKET="spark-sapp"
 S3_ENDPOINT="https://n0.minio1:9000/"
 S3_ACCESS_KEY=spark-sapp
-S3_SECRET_KEY=pd2t3yiizB0hTRjQOiIMihNNwMGeBM9P1vd1We2cUK1_MrAkRzY4qg==
-K8S_API_SERVER=https://192.168.56.14:6443   # n0.kspray2
+S3_SECRET_KEY="59_VXAEEeU1y4axPzmZZ_gUB3u2BgwK6N2X4GZ8OcGci3M6IFc5eXA=="
+K8S_API_SERVER=https://192.168.56.18:6443   # n0.kspray3
 SPARK_HOME=${MYDIR}/spark/spark-3.2.1-bin-hadoop3.2
+
+export KUBECONFIG=${MYDIR}/../../kubeconfigs/${NAMESPACE}.spark
 
 
 # This will define the schema of the resulting table

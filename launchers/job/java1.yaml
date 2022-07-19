@@ -33,6 +33,10 @@ spec:
                 secretKeyRef:
                   key: secretKey
                   name: s3access
+            - name: DRIVER_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           command:
             - "/bin/sh"
             - -c
@@ -54,6 +58,7 @@ spec:
               CONF="${CONF} --conf spark.kubernetes.file.upload.path=s3a://${SPARK_BUCKET}/shared"
               CONF="${CONF} --conf spark.hive.metastore.uris=${HIVE_METASTORE_URI}"
               CONF="${CONF} --conf spark.sql.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
+              CONF="${CONF} --conf spark.kubernetes.driver.pod.name=${DRIVER_POD_NAME}"
               CONF="${CONF} --conf hive.metastore.warehouse.dir=s3a://${SPARK_BUCKET}/warehouse"
               # These are default values. Need to be redefined here as default file is overrided, by mounting /opt/spark/conf folder
               CONF="${CONF} --conf spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a=org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"

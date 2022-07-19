@@ -46,6 +46,10 @@ spec:
               secretKeyRef:
                 key: secretKey
                 name: s3access
+          - name: DRIVER_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
         command: [bash]
         source: |
           JAR="https://n0.minio1:9000/spark-sapp/jars/simpleapp-0.1.0-uber.jar"
