@@ -562,9 +562,9 @@ This approach could be appropriate if you have a smooth CI/CD chain.
 
 Below are links for examples:
 
-- Example for Kubernetes Jobs: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/java3.yaml) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark3.yaml)
-- Example for Argo Workflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/java3.yaml) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark3.yaml)
-- Example for Apache Airflow: [Java](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/java3.py) and [PySpark](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark3.py)
+- Example for Kubernetes Jobs: [Java](./launchers/job/java3.yaml) and [PySpark](./launchers/job/pyspark3.yaml)
+- Example for Argo Workflow: [Java](./launchers/argoworkflow/java3.yaml) and [PySpark](./launchers/argoworkflow/pyspark3.yaml)
+- Example for Apache Airflow: [Java](./airflow/dags/java3.py) and [PySpark](./airflow/dags/pyspark3.py)
 
 ## Embed application code to launcher (python)
 
@@ -602,9 +602,9 @@ Here is another pattern, if you use pyspark and if your application code is made
 
 Below are links for full examples:
 
-- Example for [Kubernetes Jobs](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/job/pyspark4.yaml)
-- Example for [Argo Workflow](https://github.com/OpenDataPlatform/simpleapp/blob/main/launchers/argoworkflow/pyspark4.yaml)
-- Example for [Apache Airflow](https://github.com/OpenDataPlatform/simpleapp/blob/main/airflow/dags/pyspark4.py)
+- Example for [Kubernetes Jobs](./launchers/job/pyspark4.yaml)
+- Example for [Argo Workflow](./launchers/argoworkflow/pyspark4.yaml)
+- Example for [Apache Airflow](./airflow/dags/pyspark4.py)
 
 # The OpenDataPlatform provided images
 
